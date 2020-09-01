@@ -12,7 +12,7 @@ module Queries
         candidates = json["data"]["allCandidates"]
 
         expect(candidates.count).to eq(3)
-        
+
         candidates.each do |candidate|
           expect(candidate["id"]).to be_truthy
           expect(candidate["firstName"]).to be_truthy
@@ -36,6 +36,24 @@ module Queries
         expect(response_candidate["firstName"]).to eq(candidate.first_name)
         expect(response_candidate["lastName"]).to eq(candidate.last_name)
         expect(response_candidate["email"]).to eq(candidate.email)
+      end
+
+      it "returns an empty array if candidate ID doesn't exist" do
+        candidate = create(:candidate)
+
+        post '/graphql', params: { query: candidate(id: 3) }
+        json = JSON.parse(response.body)
+
+        expect(json["data"]["candidate"]).to eq([])
+      end
+
+      it "returns an error if candidate ID is invalid" do
+        candidate = create(:candidate)
+
+        post '/graphql', params: { query: candidate(id: "String") }
+        json = JSON.parse(response.body)
+
+        expect(json).to have_key("errors")
       end
     end
 
