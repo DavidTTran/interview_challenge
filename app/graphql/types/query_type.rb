@@ -13,5 +13,14 @@ module Types
     def hello_world
       'Hello World - This is your Interview Challenge!\nGood luck.'
     end
+
+    field :all_candidates,
+          [CandidateType],
+          null: false,
+          description: 'Returns all candidates in database'
+
+    def all_candidates
+      Candidate.all
+    end
   end
 end
