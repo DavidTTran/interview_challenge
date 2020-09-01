@@ -34,5 +34,16 @@ module Types
       Candidate.where(id)
     end
 
+    field :job_applications,
+          [JobApplicationType],
+          null: false,
+          description: 'Returns a single job application given valid ID' do
+            argument :id, Integer, required: true
+          end
+
+    def job_applications(id)
+      JobApplication.where(id)
+    end
+
   end
 end
