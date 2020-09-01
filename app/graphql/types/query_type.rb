@@ -38,11 +38,12 @@ module Types
           [JobApplicationType],
           null: false,
           description: 'Returns a single job application given valid ID' do
-            argument :id, Integer, required: true
+            argument :id, Integer, required: false
+            argument :is_active, Boolean, required: false
           end
 
-    def job_applications(id)
-      JobApplication.where(id)
+    def job_applications(filter)
+      JobApplication.where(filter)
     end
 
   end
