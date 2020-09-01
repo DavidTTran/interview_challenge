@@ -22,5 +22,17 @@ module Types
     def all_candidates
       Candidate.all
     end
+
+    field :candidate,
+          [CandidateType],
+          null: true,
+          description: 'Returns a single candidate given valid ID' do
+            argument :id, Integer, required: true
+          end
+
+    def candidate(id)
+      Candidate.where(id)
+    end
+
   end
 end
