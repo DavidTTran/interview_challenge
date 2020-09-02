@@ -10,7 +10,7 @@ module Queries
 
         job_application = json["data"]["jobApplications"]
 
-        expect(JobApplication.all.count).to eq(3)
+        expect(JobApplication.all.length).to eq(3)
 
         expect(job_application.count).to eq(1)
         expect(job_application[0]["id"]).to be_truthy
@@ -35,6 +35,25 @@ module Queries
         job_applications.each do |job_app|
           expect(job_app["isActive"]).to be true
         end
+      end
+
+      it "returns an empty array if id doesn't exist" do
+        create(:job_application, :active)
+
+        post '/graphql', params: { query: jobApplications(id: 100) }
+        json = JSON.parse(response.body)
+        job_application = json["data"]["jobApplications"]
+
+        expect(job_application).to eq([])
+      end
+
+      it "returns an error if invalid argument" do
+        create(:job_application, :active)
+
+        post '/graphql', params: { query: activeJobApplications(isActive: "no") }
+        json = JSON.parse(response.body)
+
+        expect(json).to have_key("errors")
       end
     end
 
