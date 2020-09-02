@@ -39,7 +39,7 @@ module Queries
       end
 
       it "returns an empty array if candidate ID doesn't exist" do
-        candidate = create(:candidate)
+        create(:candidate)
 
         post '/graphql', params: { query: candidate(id: 3) }
         json = JSON.parse(response.body)
@@ -48,12 +48,32 @@ module Queries
       end
 
       it "returns an error if candidate ID is invalid" do
-        candidate = create(:candidate)
+        create(:candidate)
 
         post '/graphql', params: { query: candidate(id: "String") }
         json = JSON.parse(response.body)
 
         expect(json).to have_key("errors")
+      end
+
+      it "can return a candidate with associated JobApplications" do
+        candidate = candidate_with_applications(3)
+        create_list(:job_application, 2)
+
+        post '/graphql', params: { query: candidateWithApplication(id: candidate.id) }
+        json = JSON.parse(response.body)
+        response_candidate = json["data"]["candidate"][0]
+
+        expect(Candidate.all.count).to eq(3)
+        expect(JobApplication.all.count).to eq(5)
+        
+        expect(response_candidate["id"].to_i).to eq(candidate.id)
+        expect(response_candidate["jobApplications"]).to be_truthy
+        expect(response_candidate["jobApplications"].count).to eq(3)
+
+        response_candidate["jobApplications"].each do |app|
+          expect(app["candidateId"]).to eq(candidate.id)
+        end
       end
     end
 
@@ -78,6 +98,24 @@ module Queries
             firstName
             lastName
             email
+          }
+        }
+      GQL
+    end
+
+    def candidateWithApplication(id:)
+      <<~GQL
+        query {
+          candidate(id: #{id}) {
+            id
+            firstName
+            lastName
+            email
+            jobApplications {
+              id
+              candidateId
+              jobPostingId
+            }
           }
         }
       GQL
